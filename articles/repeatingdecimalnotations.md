@@ -45,9 +45,7 @@ julia> rationalify("0.1(6)")  # 逆向きの変換
 1//6
 ```
 
-# デザイン
-
-## 循環小数を表せる型たち
+# 循環小数を表せる型たち
 3つの循環小数を表せる型があります。 `Base`出身の`String`と`Rational`、それと本パッケージで定義している`RepeatingDecimal`です。
 
 * `Rational{T}`
@@ -85,7 +83,7 @@ julia> RepeatingDecimal(true, 123456_786_786, 786_786, 9, 6)
    Finite part Repeating part
 ```
 
-## 変換用の関数: `stringify`, `rationalify`
+# 変換用の関数: `stringify`, `rationalify`
 
 ```mermaid
 graph LR
@@ -131,7 +129,7 @@ julia> r == rationalify(str) == rationalify(rd)
 true
 ```
 
-## `RepeatingDecimalNotation`の部分型
+# `RepeatingDecimalNotation`の部分型
 これらの型が循環小数の表記スタイルを表しています。
 
 ```julia
@@ -143,7 +141,7 @@ julia> subtypes(RepeatingDecimalNotation)
 ```
 
 
-### `ParenthesesNotation` (デフォルト)
+## `ParenthesesNotation` (デフォルト)
 $$
 123.45(678)
 $$
@@ -167,7 +165,7 @@ julia> rationalify(no, "123.45(678)")
 
 [^1]: REPLで`julia> 123.45(678)`を計算してみよう！
 
-### `ScientificNotation`
+## `ScientificNotation`
 $$
 1.2345\text{r}678\text{e}2
 $$
@@ -192,7 +190,7 @@ julia> rd"1.2345r678e2"  # 指数表記もOK
 4111111//33300
 ```
 
-### `EllipsisNotation`
+## `EllipsisNotation`
 $$
 123.45678678...
 $$
