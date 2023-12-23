@@ -5,7 +5,7 @@ type: "tech"
 topics:
   - "julia"
   - "math"
-published: false
+published: true
 ---
 
 ![](https://raw.githubusercontent.com/hyrodium/RepeatingDecimalNotations.jl/17585ec27e6c8525d85844610bb45e0b841d0b3e/docs/src/assets/logo.svg)
