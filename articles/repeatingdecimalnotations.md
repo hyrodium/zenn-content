@@ -8,6 +8,9 @@ topics:
 published: true
 ---
 
+これは[Julia Advent Calendar 2023](https://qiita.com/advent-calendar/2023/julia)の19日目の記事です。
+19日目の記事が投稿されていなかったので代打投稿します。
+
 ![](https://raw.githubusercontent.com/hyrodium/RepeatingDecimalNotations.jl/17585ec27e6c8525d85844610bb45e0b841d0b3e/docs/src/assets/logo.svg)
 
 # トロトロのイントロ
