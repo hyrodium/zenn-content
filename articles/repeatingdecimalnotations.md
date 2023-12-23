@@ -227,8 +227,8 @@ julia> rd"0.133313333..." # 0.13331(3)と同じ。 末尾に[3]を追加して�
 # アウアウッ アウトロ
 
 * 今後の開発方針
-  * もうすぐGeneralに登録されるはず([General#97572](https://github.com/JuliaRegistries/General/pull/97572))
-  * `DotsNotation`のサポート追加([RepeatingDecimalNotations.jl#4](https://github.com/hyrodium/RepeatingDecimalNotations.jl/issues/4))
+  * もうすぐGeneralに登録されるはず ([General#97572](https://github.com/JuliaRegistries/General/pull/97572))
+  * `DotsNotation`のサポート追加 ([RepeatingDecimalNotations.jl#4](https://github.com/hyrodium/RepeatingDecimalNotations.jl/issues/4))
 * 感想
   * Documenter.jlは素晴らしく、良いドキュメントが直感的に書けて良いですね。
   * Test.jlは素晴らしく、良いテストが直感的に書けて良いですね。
