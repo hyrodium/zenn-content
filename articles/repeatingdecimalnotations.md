@@ -13,7 +13,7 @@ published: false
 # トロトロのイントロ
 Juliaで循環小数を扱うための[`RepeatingDecimalNotations.jl`](https://github.com/hyrodium/RepeatingDecimalNotations.jl)パッケージを作りました！
 
-↓↓以下のように使えます↓↓
+🫠🫠以下のように使えます🫠🫠
 
 ```julia
 julia> using RepeatingDecimalNotations
@@ -48,8 +48,7 @@ julia> rationalify("0.1(6)")  # 逆向きの変換
 # デザイン
 
 ## 循環小数を表せる型たち
-3つの循環小数を表せる型があります。
-`Base`出身の`String`と`Rational`、それと本パッケージで定義している`RepeatingDecimal`です。
+3つの循環小数を表せる型があります。 `Base`出身の`String`と`Rational`、それと本パッケージで定義している`RepeatingDecimal`です。
 
 * `Rational{T}`
     * 分母分子をそれぞれ`T<:Real`として保持します。
@@ -149,6 +148,9 @@ $$
 123.45(678)
 $$
 
+* 😊 一般的に普及している表記
+* 😇 Juliaの文法では乗算とconflictしてしまう[^1]
+
 ```julia
 julia> rd"123.45(678)"
 4111111//33300
@@ -163,10 +165,15 @@ julia> rationalify(no, "123.45(678)")
 4111111//33300
 ```
 
+[^1]: REPLで`julia> 123.45(678)`を計算してみよう！
+
 ### `ScientificNotation`
 $$
 1.2345\text{r}678\text{e}2
 $$
+
+* 😁 指数表記とも組み合わせ可能
+* 🥲 あまり普及していない記法ではある
 
 ```julia
 julia> rd"123.45r678"
@@ -189,6 +196,9 @@ julia> rd"1.2345r678e2"  # 指数表記もOK
 $$
 123.45678678...
 $$
+
+* 🤩 循環部分を明示的に書かなくてもOK
+* 😝 長ったらしくなりがち
 
 ```julia
 julia> rd"123.45678678..."
@@ -219,8 +229,8 @@ julia> rd"0.133313333..." # 0.13331(3)と同じ。 末尾に[3]を追加して�
 # アウアウッ アウトロ
 
 * 今後の開発方針
-  * Generalに登録
-  * `DotsNotation`のサポート追加
+  * もうすぐGeneralに登録されるはず([General#97572](https://github.com/JuliaRegistries/General/pull/97572))
+  * `DotsNotation`のサポート追加([RepeatingDecimalNotations.jl#4](https://github.com/hyrodium/RepeatingDecimalNotations.jl/issues/4))
 * 感想
-  * Juliaのドキュメントシステムは素晴らしく、良いドキュメントが直感的に書けて良いですね。
-  * Juliaのテストシステムは素晴らしく、良いテストが直感的に書けて良いですね。
+  * Documenter.jlは素晴らしく、良いドキュメントが直感的に書けて良いですね。
+  * Test.jlは素晴らしく、良いテストが直感的に書けて良いですね。
