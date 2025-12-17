@@ -121,7 +121,7 @@ https://zenn.dev/terasakisatoshi/articles/87e730a50915f9
 以下のコマンドを`~/.julia/dev/MyPkg`以下で実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
 
 ```bash
-julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
+julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia --project=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
 ```
 
 ## 詳細をもう少し解説
@@ -156,7 +156,7 @@ Codecovのようなイケてる見た目ではないですが、ローカルで�
 julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)'
 
 # Coverage.jlを利用して`coverage-lcov.info`ファイルを出力
-julia -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
+julia --projct=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
 
 # `coverage-lcov.info`をベースに`coverage`ディレクトリに人間可読性の高いHTMLファイルを出力
 genhtml coverage-lcov.info --output-directory coverage
@@ -323,19 +323,25 @@ doctest(Desmos; fix=true)
 
 [^test-env-env]: もしかすると私が知らないだけで「共有プロジェクト環境」からTestEnv.jlを使う方法はあるかも知れないです。
 
-```julia
-pkg> activate ~/.julia/dev/ChainRules
-
+```julia: ~/.julia/dev/Desmosをプロジェクト環境としてJuliaを起動した場合
 julia> using TestEnv;
 
 julia> TestEnv.activate();
 
-julia> using ChainRulesTestUtils
+julia> using Desmos, Aqua  # 通常のパッケージ環境だとAquaはusingできない
 ```
 
 ## 詳細をもう少し解説
 
-(TestEnv.jlが便利な理由について、他のセクションと同じ粒度で下書きを書いてみてください)
+パッケージのために定義される環境は「ディレクトリごとのプロジェクト環境」に該当します。
+例えばDesmos.jlの場合は`~/.julia/dev/Desmos/Project.toml`に依存関係などが記載されています。
+このプロジェクトファイルを指定した場合には「バッケージが依存しているパッケージ」のみが使用可能な状態でJuliaが起動します。
+しかし、このプロジェクトファイルにはテスト用のパッケージ依存関係も`[extras]`として記載されています。
+
+このようなテスト用パッケージまで使用可能な状態でJuliaを起動するときに便利なのが、前述の[TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)でした。
+この関数を読み込んで`TestEnv.activate()`すればテスト用のパッケージ環境がそろった状態になります。
+
+便利で良いと思います。
 
 # コード検索
 
@@ -343,12 +349,12 @@ julia> using ChainRulesTestUtils
 
 以下の2種類の方法でコード検索ができるので便利
 
-- JuliaHubによるコード検索
 - GitHub上のコード検索
+- JuliaHubによるコード検索
 
 ## 詳細をもう少し解説
 
-Juliaには`@less`マクロがあって…
+Juliaには`@less`マクロ
 しかし、「この関数が他のパッケージでどのように使われているか知りたい」みたいに
 ここでJuliaHubの
 
