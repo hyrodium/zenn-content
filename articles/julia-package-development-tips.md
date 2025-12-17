@@ -38,10 +38,10 @@ julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.add(["Documenter", 
 
 ## 詳細をもう少し解説
 
-Juliaのパッケージ環境には大雑把に言って「デフォルトの`v1.x`」「ディレクトリごとのプロジェクト環境」「共有プロジェクト環境」「スクリプト環境」の4種類があります。
+Juliaのパッケージ環境には大雑把に言って「グローバル環境の`v1.x`」「ディレクトリごとのプロジェクト環境」「共有プロジェクト環境」「スクリプト環境」の4種類があります。
 
-- デフォルトの`v1.x`
-  - `--project`を指定しなかった場合に起動するもの
+- グローバル環境の`v1.x`
+  - `--project`を指定しなかった場合に起動するデフォルトの環境
   - プロジェクトファイルの
   - `~/.julia/environments/v1.x/Project.toml`
 - ディレクトリごとのプロジェクト環境
@@ -319,7 +319,7 @@ doctest(Desmos; fix=true)
 ## 先に結論を提示
 
 [TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)を使えば良い。
-ただしインストール先は「デフォルトの`v1.x`」であって、「ディレクトリごとのプロジェクト環境」や「共有プロジェクト環境」ではない。[^test-env-env]
+ただしインストール先は「グローバル環境の`v1.x`」であって、「ディレクトリごとのプロジェクト環境」や「共有プロジェクト環境」ではない。[^test-env-env]
 
 [^test-env-env]: もしかすると私が知らないだけで「共有プロジェクト環境」からTestEnv.jlを使う方法はあるかも知れないです。
 
@@ -336,12 +336,32 @@ julia> using Desmos, Aqua  # 通常のパッケージ環境だとAquaはusingで
 パッケージのために定義される環境は「ディレクトリごとのプロジェクト環境」に該当します。
 例えばDesmos.jlの場合は`~/.julia/dev/Desmos/Project.toml`に依存関係などが記載されています。
 このプロジェクトファイルを指定した場合には「バッケージが依存しているパッケージ」のみが使用可能な状態でJuliaが起動します。
+
+```julia: ~/.julia/dev/Desmosをプロジェクト環境としてJuliaを起動した場合
+julia> using Desmos  # もちろんDesmos.jlはインポートできる
+
+julia> using Aqua  # しかし[extras]内のAqua.jlは使用できない
+ERROR: ArgumentError: Package Aqua not found in current path.
+- Run `import Pkg; Pkg.add("Aqua")` to install the Aqua package.
+Stacktrace:
+ [...]
+```
+
 しかし、このプロジェクトファイルにはテスト用のパッケージ依存関係も`[extras]`として記載されています。
+このようなテスト用パッケージまで使用可能な状態でJuliaを起動するときに便利なのが、前述の[TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)です。
+この関数を読み込んで`TestEnv.activate()`すればテスト用のパッケージ環境が揃った状態になります。
 
-このようなテスト用パッケージまで使用可能な状態でJuliaを起動するときに便利なのが、前述の[TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)でした。
-この関数を読み込んで`TestEnv.activate()`すればテスト用のパッケージ環境がそろった状態になります。
+```julia: ~/.julia/dev/Desmosをプロジェクト環境としてJuliaを起動した場合
+julia> using TestEnv  # ~/.julia/dev/Desmos/Project.tomlの依存関係には記載されていないが、グローバル環境(v1.x)にインストール済みなので使用可能
 
-便利で良いと思います。
+julia> TestEnv.activate();
+
+julia> using Desmos  # もちろんDesmos.jlはインポートできる
+
+julia> using Aqua  # [extras]内のAqua.jlも使えるようになった！
+```
+
+便利で良いですね。
 
 # コード検索
 
@@ -354,16 +374,16 @@ julia> using Desmos, Aqua  # 通常のパッケージ環境だとAquaはusingで
 
 ## 詳細をもう少し解説
 
-Juliaには`@less`マクロ
-しかし、「この関数が他のパッケージでどのように使われているか知りたい」みたいに
-ここでJuliaHubの
+多くのJuliaパッケージがGitHubにホストされているので参考になるとは思います。
+Julia言語に限定して検索する場合には <todo> にアクセスして、<foo>をJulia言語に設定すれば良いです。
+他にもxxやyyを設定して検索対象を絞っていくことが可能です。
 
-例として、`@rd_str`を確認してみましょう。
-https://zenn.dev/link/comments/3d2a0b0e9bf563
+JuliaHubが提供するコード検索サービスもあります。
+こちらの検索は以下のようなメリットがあります。
 
-GitHubにも同様の機能がありますが、こっちは
-- 登録されていないパッケージやコード断片も検索対象になってしまう
-- GitHubしか検索できない
+- 登録済みパッケージに限定できるのでコード品質が多少は期待できる
+- Julia言語に特化した検索が利用可能
+- GitHubだけでなくGitLabなどの他のホスティングサービスも検索対象になる
 
 # おわりに
 - 他にTipsあればコメントで教えてください！
