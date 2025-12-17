@@ -195,7 +195,7 @@ julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
 以下のコマンドを`~/.julia/dev/<MyPkg>`以下で実行すればjldoctestブロックが更新されます。
 
 ```bash
-[ -f docs/make.jl ] && julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; include("docs/make.jl"); thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true)' || julia --project=@pkgdev -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); mkpath("docs/src"); using Documenter; pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym)); thispkg = getfield(Main, pkg_sym); Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true); doctest(thispkg; fix=true)'
+[ -f docs/make.jl ] && julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; try include("docs/make.jl"); catch end; thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true)' || julia --project=@pkgdev -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); mkpath("docs/src"); using Documenter; pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym)); thispkg = getfield(Main, pkg_sym); Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true); doctest(thispkg; fix=true)'
 ```
 
 ## 詳細をもう少し解説
@@ -248,7 +248,8 @@ JuliaのREPLは優秀で便利ではあるのですが、上記のコードを�
 あれの中身を展開してインデントを揃えると以下のようになります。
 
 ```julia: docs/make.jlが存在する場合
-using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+using Pkg
+Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
 Documenter.deploydocs(kwargs...) = nothing
@@ -261,13 +262,15 @@ doctest(thispkg; fix=true)
 ```
 
 ```julia: docs/make.jlが存在しない場合
-using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+using Pkg
+Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
+mkpath("docs/src")
 using Documenter
 pkg_sym = Symbol(basename(pwd()))
-Core.eval(Main, :(using $pkg_sym; Documenter.DocMeta.setdocmeta!($pkg_sym, :DocTestSetup, :(using $pkg_sym); recursive=true)))
-end
-thispkg = getfield(Main, Symbol(basename(pwd())))
+Core.eval(Main, :(using $pkg_sym))
+thispkg = getfield(Main, pkg_sym)
+Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true)
 doctest(thispkg; fix=true)
 ```
 
@@ -276,7 +279,8 @@ doctest(thispkg; fix=true)
 
 ```julia: docs/make.jlが存在する場合
 # Desmos.jlをdevとして依存関係に追加
-using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+using Pkg
+Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
 # 以降の`make.jl`の実行時に不要なデプロイ処理を避けるためにメソッドを上書きして無効化しておく
@@ -293,8 +297,11 @@ doctest(Desmos; fix=true)
 
 ```julia: docs/make.jlが存在しない場合
 # Desmos.jlをdevとして依存関係に追加
-using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+using Pkg
+Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
+# doctestの実行には`docs/src`ディレクトリが必要らしいので作っておく (空でOK)
+mkpath("docs/src")
 using Documenter
 using Desmos
 # doctest実行時に`using MyPkg`を省略するのは標準的な作法だとして`setdocmeta!`しておく
@@ -308,8 +315,6 @@ doctest(Desmos; fix=true)
 [^julia-fix-doctests]: このような処理を自動でGitHub Actionsが定期的に実行してくれるのが理想的だと思いますよね？実は[actions/julia-fix-doctests](https://github.com/julia-actions/julia-fix-doctests)というものがあるんですが、数年間メンテナンスされておらず、本記事で示したように`docs/make.jl`を読み込んだりはしてくれません。気が向いた時にPR送ってみようと思います。
 
 # テストの実行環境を用意
-
-
 
 TestEnv.jlを使えば良い
 https://github.com/JuliaTesting/TestEnv.jl
