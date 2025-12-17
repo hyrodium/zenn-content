@@ -2,7 +2,7 @@
 title: "Juliaパッケージ開発のアレってどうやんだっけ？となった時に見る記事"
 emoji: "🤔"
 type: "tech"
-topics: [julia]
+topics: [julia, パッケージ管理, codecov, doctest]
 published: true
 ---
 
@@ -347,9 +347,11 @@ Stacktrace:
  [...]
 ```
 
-しかし、このプロジェクトファイルにはテスト用のパッケージ依存関係も`[extras]`として記載されています。
+しかし、このプロジェクトファイルにはテスト用のパッケージ依存関係も`[extras]`として記載されています。[^test-project]
 このようなテスト用パッケージまで使用可能な状態でJuliaを起動するときに便利なのが、前述の[TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)です。
 この関数を読み込んで`TestEnv.activate()`すればテスト用のパッケージ環境が揃った状態になります。
+
+[^test-project]: `[extras]`の代わりに`test/Project.toml`ファイルを用意してテスト用のパッケージ環境を構築することも可能です。別ファイルで管理する方法の方が新しく、(どちらかと言えば)推奨されているようです。詳細は[Pkg.jlの公式ドキュメント](https://pkgdocs.julialang.org/v1/creating-packages/#Test-specific-dependencies)を確認してください。
 
 ```julia: ~/.julia/dev/Desmosをプロジェクト環境としてJuliaを起動した場合
 julia> using TestEnv  # ~/.julia/dev/Desmos/Project.tomlの依存関係には記載されていないが、グローバル環境(v1.x)にインストール済みなので使用可能
