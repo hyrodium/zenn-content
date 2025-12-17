@@ -17,7 +17,7 @@ published: false
 - テストの実行環境を用意
 - コード検索
 
-[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の17日目の記事のはじまりでした。
+[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の17日目の記事のはじまりでした。一日遅れですみません。
 よろしくおねがいします。
 
 # 共有パッケージ環境を使用する方法
@@ -33,7 +33,7 @@ julia --project=@pkgdev
 今回の記事で使用するパッケージは以下のコマンドでインストールできます。
 
 ```bash
-julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.add(["Documenter", "DocumenterTools", "Coverage", "TestEnv", "LiveServer"])'
+julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.add(["Documenter", "DocumenterTools", "Coverage", "LiveServer"])'
 ```
 
 ## 詳細をもう少し解説
@@ -316,12 +316,37 @@ doctest(Desmos; fix=true)
 
 # テストの実行環境を用意
 
-TestEnv.jlを使えば良い
-https://github.com/JuliaTesting/TestEnv.jl
+## 先に結論を提示
 
+[TestEnv.jl](https://github.com/JuliaTesting/TestEnv.jl)を使えば良い。
+ただしインストール先は「デフォルトの`v1.x`」であって、「ディレクトリごとのプロジェクト環境」や「共有プロジェクト環境」ではない。[^test-env-env]
+
+[^test-env-env]: もしかすると私が知らないだけで「共有プロジェクト環境」からTestEnv.jlを使う方法はあるかも知れないです。
+
+```julia
+pkg> activate ~/.julia/dev/ChainRules
+
+julia> using TestEnv;
+
+julia> TestEnv.activate();
+
+julia> using ChainRulesTestUtils
+```
+
+## 詳細をもう少し解説
+
+(TestEnv.jlが便利な理由について、他のセクションと同じ粒度で下書きを書いてみてください)
 
 # コード検索
 
+## 先に結論を提示
+
+以下の2種類の方法でコード検索ができるので便利
+
+- JuliaHubによるコード検索
+- GitHub上のコード検索
+
+## 詳細をもう少し解説
 
 Juliaには`@less`マクロがあって…
 しかし、「この関数が他のパッケージでどのように使われているか知りたい」みたいに
