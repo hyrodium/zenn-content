@@ -415,6 +415,6 @@ DocMeta.setdocmeta! language:Julia
 # おわりに
 - 他にTipsあればコメントで教えてください！[^owarini]
 - 本文では触れませんでしたが、[Modern Julia Workflows](https://modernjuliaworkflows.org/)にはJulia言語のtipsが体系的に整理されているのでオススメです。
-- 質問あれば、本記事へのコメントでもJuliaLangJaのDiscordでの投稿でもOKです！
+- 質問あれば、本記事へのコメントでも[JuliaLangJa](https://julialangja.github.io/)のDiscordでの投稿でもOKです！
 
 [^owarini]: 私はプロファイリングとかデバッグなどにあまり詳しくなく、その辺りのことは本記事で書いてませんでした。
