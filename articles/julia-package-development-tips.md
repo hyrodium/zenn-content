@@ -3,7 +3,7 @@ title: "Juliaパッケージ開発のアレってどうやんだっけ？とな�
 emoji: "🤔"
 type: "tech"
 topics: [julia]
-published: false
+published: true
 ---
 
 # はじめに
@@ -162,15 +162,15 @@ genhtml coverage-lcov.info --output-directory coverage
 ```
 
 最初のテストでは`src/*.jl.*.cov`のようなJulia言語特有のカバレッジ記録ファイルが出力されています。
-これを、lcovという他の言語でも共通のカバレッジ記録用フォーマットに変換するのが[Coverage.jl](https://github.com/JuliaCI/Coverage.jl)の役割ですね。
-lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[^genhtml]
+これを、lcov形式という他の言語でも共通のカバレッジ記録用フォーマットに変換するのが[Coverage.jl](https://github.com/JuliaCI/Coverage.jl)の役割ですね。
+lcov形式から人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[^genhtml]
 
 [^genhtml]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
 
 # Documenter.jlで生成したドキュメントをローカルで確認
 ## 先に結論を提示
 
-以下のコマンドを実行すれば localhost:8000 などのアドレスからドキュメントがプレビューできます。
+以下のコマンドをパッケージのルートディレクトリで実行すれば localhost:8000 などのアドレスからドキュメントがプレビューできます。
 ```bash
 julia --project=docs --startup-file=no -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");' && julia --project=@pkgdev --startup-file=no -e 'using LiveServer; serve(dir="docs/build")'
 ```
