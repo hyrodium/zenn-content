@@ -155,7 +155,7 @@ Codecovのようなイケてる見た目ではないですが、ローカルで�
 julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)'
 
 # Coverage.jlを利用して`coverage-lcov.info`ファイルを出力
-julia --projct=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
+julia --project=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
 
 # `coverage-lcov.info`をベースに`coverage`ディレクトリに人間可読性の高いHTMLファイルを出力
 genhtml coverage-lcov.info --output-directory coverage
@@ -334,7 +334,7 @@ julia> using Desmos, Aqua  # 通常のパッケージ環境だとAquaはusingで
 
 パッケージのために定義される環境は「ディレクトリごとのプロジェクト環境」に該当します。
 例えばDesmos.jlの場合は`~/.julia/dev/Desmos/Project.toml`に依存関係などが記載されています。
-このプロジェクトファイルを指定した場合には「バッケージが依存しているパッケージ」のみが使用可能な状態でJuliaが起動します。
+このプロジェクトファイルを指定した場合には「パッケージが依存しているパッケージ」のみが使用可能な状態でJuliaが起動します。
 
 ```julia: ~/.julia/dev/Desmosをプロジェクト環境としてJuliaを起動した場合
 julia> using Desmos  # もちろんDesmos.jlはインポートできる
