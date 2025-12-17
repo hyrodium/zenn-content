@@ -32,7 +32,7 @@ julia --project=@pkgdev
 
 ## 詳細をもう少し解説
 
-Juliaのパッケージには「」「」「」の3種類があって…みたいな話
+Juliaのパッケージ環境には「デフォルトのv1.x」「ディレクトリごとのプロジェクト環境」「共有プロジェクト環境「スクリプト環境」の4種類があって…みたいな話
 (すいません書きかけです)
 
 ```
@@ -78,7 +78,7 @@ JuliaではDocumenter.jlでドキュメント生成する慣習があります�
 1. デプロイされたドキュメントが閲覧できるようになる
 
 ここの「新規タグの更新を検知して`.github/workflows/Docs.yml`を起動」に失敗しているケースが多いんですよね。
-`.github/workflows/Docs.yml`の設定にはタグ追加でトリガーされると記載されていても、botが作ったタグには反応してくれないみたいなんですよね。
+`.github/workflows/Docs.yml`を用意してタグ追加でトリガーされると記載されていても、botが作ったタグには反応してくれないケースがあるんですよね。
 これを解決するには、冒頭で述べたようなコマンドを実行して案内にしたがってキーを追加すればOKです。
 私([hyrodium](https://github.com/hyrodium/))の作っている[Desmos.jl](https://github.com/hyrodium/Desmos.jl)というパッケージの場合だとこんな感じ:
 
@@ -114,12 +114,14 @@ julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && ju
 ```
 
 ## 詳細をもう少し解説
-GitHub上でパブリックリポジトリとしてパッケージ開発を進めている場合には`.github/workflows/Test.yml`([Desmos.jlでの例](https://github.com/hyrodium/Desmos.jl/blob/main/.github/workflows/Test.yml))を設定すれば[codecov.io](https://about.codecov.io/)とかでカバレッジが取得できますよね。
+GitHub上でパブリックリポジトリとしてパッケージ開発を進めている場合には`.github/workflows/Test.yml`([Desmos.jlでの例](https://github.com/hyrodium/Desmos.jl/blob/main/.github/workflows/Test.yml))を設定すれば[codecov.io](https://about.codecov.io/)とかでカバレッジが閲覧できますよね。
 具体的には以下のような手順です。
 
 1. パッケージ本体(`src/`)とテスト(`test/`)の実装を進める
 1. 定期的にcommitしてGitHubにpushする
 1. CIが走ってcodecov.ioにカバレッジがアップロードされるので目視確認する
+
+https://app.codecov.io/gh/hyrodium/Desmos.jl/tree/main/src
 
 [![](/images/coverage-codecov-desmos-jl.png)](https://app.codecov.io/gh/hyrodium/Desmos.jl/tree/main/src)
 
@@ -151,7 +153,9 @@ genhtml coverage-lcov.info --output-directory coverage
 
 最初のテストでは`src/*.jl.*.cov`のようなJulia言語特有のカバレッジ記録ファイルが出力されています。
 これを、lcovという他の言語でも共通のカバレッジ記録用フォーマットに変換するのが[Coverage.jl](https://github.com/JuliaCI/Coverage.jl)の役割ですね。
-lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。
+lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[3^]
+
+[3^]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
 
 # Documenter.jlで生成したドキュメントをローカルで確認
 ## 先に結論を提示
@@ -206,10 +210,10 @@ myfunc(x) = x^2 - 1
 end
 ````
 
-jldoctestは通常の`test`ディレクトリのテストとは別に、docstring内にREPLの出力結果として記述できることが特徴です。
+jldoctestは通常の`test`ディレクトリ内のテストとは別のもので、docstring内にREPLの出力結果として記述できることが特徴です。
 しかしこのテスト、ドキュメントの更新がコード更新に間に合っていなかったり、出力フォーマットが微妙に変わったり[^2]とかで、最新の状態に保たれていないことが多いんですよね。
 
-[^2]: 通常、`Base.show`で出力される文字列の変更は破壊的変更として扱われません。そのため、出力文字列の比較として実行されるjldoctestは依存パッケージでの`Base.show`を更新したりするだけで容易に壊れてしまいます。
+[^2]: 通常、`Base.show`で出力される文字列の変更は破壊的変更として扱われません。そのため、出力文字列の比較として実行されるjldoctestは依存パッケージでの`Base.show`が更新されたりするだけで容易に壊れてしまいます。
 
 この壊れがちなdoctestを更新するにはDocumenter.jlの力を借りて以下のようなコマンドを実行します。
 
@@ -272,11 +276,14 @@ doctest(Desmos; fix=true)
 ```
 
 CIではどうやってたっけ?
+
+https://github.com/julia-actions/julia-fix-doctests
+
 doctest更新CIも存在していたが、更新されていない
 
 # テストの実行環境を用意
 TestEnv.jlを使えば良い
-
+https://github.com/JuliaTesting/TestEnv.jl
 
 
 # コード検索
