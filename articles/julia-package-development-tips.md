@@ -195,7 +195,7 @@ julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
 以下のコマンドを`~/.julia/dev/<MyPkg>`以下で実行すればjldoctestブロックが更新されます。
 
 ```bash
-julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; if isfile("docs/make.jl") try include("docs/make.jl") catch end else pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym; Documenter.DocMeta.setdocmeta!($pkg_sym, :DocTestSetup, :(using $pkg_sym); recursive=true))) end; thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true);'
+[ -f docs/make.jl ] && julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; include("docs/make.jl"); thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true)' || julia --project=@pkgdev -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); mkpath("docs/src"); using Documenter; pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym)); thispkg = getfield(Main, pkg_sym); Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true); doctest(thispkg; fix=true)'
 ```
 
 ## 詳細をもう少し解説
