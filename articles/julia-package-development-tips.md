@@ -30,7 +30,7 @@ juliaのCLI引数で`--project=@pkgdev`のように`@<shared env name>`を指定
 julia --project=@pkgdev
 ```
 
-今回の記事で使用するパッケージは以下のコマンドでインストールできます。
+(**重要**) 今回の記事で使用するパッケージは以下のコマンドでインストールできます。
 
 ```bash
 julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.add(["Documenter", "DocumenterTools", "Coverage", "LiveServer"])'
@@ -120,7 +120,7 @@ https://zenn.dev/terasakisatoshi/articles/87e730a50915f9
 以下のコマンドを`~/.julia/dev/MyPkg`以下で実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
 
 ```bash
-julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia --project=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
+julia --project=. --startup-file=no -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia --project=@pkgdev --startup-file=no -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
 ```
 
 ## 詳細をもう少し解説
@@ -152,10 +152,10 @@ Codecovのようなイケてる見た目ではないですが、ローカルで�
 
 ```bash
 # 現在のパッケージディレクトリでテストを実行。カバレッジ取得モードをtrueに設定。
-julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)'
+julia --project=. --startup-file=no -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)'
 
 # Coverage.jlを利用して`coverage-lcov.info`ファイルを出力
-julia --project=@pkgdev -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
+julia --project=@pkgdev --startup-file=no -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)'
 
 # `coverage-lcov.info`をベースに`coverage`ディレクトリに人間可読性の高いHTMLファイルを出力
 genhtml coverage-lcov.info --output-directory coverage
@@ -172,7 +172,7 @@ lcovから人間の読みやすいフォーマットに変換するコマンド�
 
 以下のコマンドを実行すれば localhost:8000 などのアドレスからドキュメントがプレビューできます。
 ```bash
-julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");' && julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
+julia --project=docs --startup-file=no -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");' && julia --project=@pkgdev --startup-file=no -e 'using LiveServer; serve(dir="docs/build")'
 ```
 
 ## 詳細をもう少し解説
@@ -182,19 +182,20 @@ GitHubでパッケージを管理している場合は、GitHub Pagesにデプ�
 
 ```bash
 # ドキュメントを生成
-julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");'
+julia --project=docs --startup-file=no -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");'
 
 # ビルドされたドキュメントを表示するサーバーを立ち上げる
-julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
+julia --project=@pkgdev --startup-file=no -e 'using LiveServer; serve(dir="docs/build")'
 ```
 
 # jldoctestの更新
 
 ## 先に結論を提示
 以下のコマンドを`~/.julia/dev/<MyPkg>`以下で実行すればjldoctestブロックが更新されます。
+忙しい人向け。長過ぎるワンライナーなので、本来ならちゃんとシェルスクリプトとして整備するのが良いでしょう。
 
 ```bash
-[ -f docs/make.jl ] && julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; try include("docs/make.jl"); catch end; thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true)' || julia --project=@pkgdev -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); mkpath("docs/src"); using Documenter; pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym)); thispkg = getfield(Main, pkg_sym); Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true); doctest(thispkg; fix=true)'
+[ -f docs/make.jl ] && julia --project=docs --startup-file=no -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); using Documenter; Documenter.deploydocs(kwargs...) = nothing; try include("docs/make.jl"); catch end; thispkg = getfield(Main, Symbol(basename(pwd()))); doctest(thispkg; fix=true)' || julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); mkpath("docs/src"); using Documenter; pkg_sym = Symbol(basename(pwd())); Core.eval(Main, :(using $pkg_sym)); thispkg = getfield(Main, pkg_sym); Documenter.DocMeta.setdocmeta!(thispkg, :DocTestSetup, :(using $pkg_sym); recursive=true); doctest(thispkg; fix=true)'
 ```
 
 ## 詳細をもう少し解説
