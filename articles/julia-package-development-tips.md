@@ -42,7 +42,6 @@ Juliaのパッケージ環境には大雑把に言って「グローバル環境
 
 - グローバル環境の`v1.x`
   - `--project`を指定しなかった場合に起動するデフォルトの環境
-  - プロジェクトファイルの
   - `~/.julia/environments/v1.x/Project.toml`
 - ディレクトリごとのプロジェクト環境
   - `Project.toml`の配置されたディレクトリを直接指定して起動する環境
@@ -382,34 +381,39 @@ julia> using Aqua  # [extras]内のAqua.jlも使えるようになった！
 多くのJuliaパッケージがGitHubにホストされているので、GitHubのコード検索が使えます。
 [GitHub Code Search](https://github.com/search?type=code)にアクセスして、言語をJuliaに限定して検索すれば効率的です。
 
-例えば`@macroexpand`の使用例を探したい場合は以下のように入力します。
+例えば`DocMeta.setdocmeta!`の使用例を探したい場合は以下のように入力します。
+
 ```
-@macroexpand language:Julia
+DocMeta.setdocmeta! language:Julia
 ```
 
-- 検索結果をURLで共有することも可能です: https://github.com/search?type=code&q=%40macroexpand+language%3AJulia
-- 更新日で制限して検索することも可能です: (上URLを修正して日付区間を入れる)
+他にも以下のような検索オプションが便利です:
 
+| 検索条件 | 検索コマンド |
+| :-- | :-- |
+| 特定のディレクトリ内に限定 | `using Documenter path:docs/ language:Julia` |
+| 特定のファイル名を指定 | `makedocs path:**/make.jl language:Julia` |
+| 特定の組織/ユーザーのリポジトリに限定 | `@assert org:JuliaLang language:Julia` |
+| ファイル拡張子で絞り込み | `struct path:*.jl` |
 
 ### JuliaHubによるコード検索
 
 [JuliaHubのコード検索](https://juliahub.com/ui/Search?type=code)も便利です。
 
-
 こちらにはGitHubのコード検索に比べて以下のようなメリットがあります:
 
-- 登録済みパッケージに限定されるのでコード品質が多少は期待できる
+- [General](https://github.com/JuliaRegistries/General)に登録済みパッケージに限定されるのでコード品質が多少は期待できる
 - Julia言語に特化した検索機能が利用可能
 - GitHubだけでなくGitLabなどの他のホスティングサービスも検索対象になる
 
 特に開発者の立場からは以下のような場面で便利です。
 
 - 新しくexportする識別子が他のパッケージと重複していないか確認したい
-- 自分のメンテナンスしているパッケージの機能を廃止したいが、どれくらいその機能のユーザーが居るか確認したい
+- 自分のメンテナンス中のパッケージの機能を廃止する際に与える、他のパッケージへの影響を確認したい
 
 # おわりに
-- 他にTipsあればコメントで教えてください！
-	- プロファイリングとかデバッグとかあまり詳しくないのでベストプラクティスがあれば知りたい
-- ModernJuliaWorkflowとか
-- 関連する質問があればコメントしてください！
-- JuliaLangJaのDiscordのメンバーも募集中です！こちらで質問を投げてもらっても良いです！
+- 他にTipsあればコメントで教えてください！[^owarini]
+- 本文では触れませんでしたが、[Modern Julia Workflows](https://modernjuliaworkflows.org/)にはJulia言語のtipsが体系的に整理されているのでオススメです。
+- 質問あれば、本記事へのコメントでもJuliaLangJaのDiscordでの投稿でもOKです！
+
+[^owarini]: 私はプロファイリングとかデバッグなどにあまり詳しくなく、その辺りのことは本記事で書いてませんでした。
