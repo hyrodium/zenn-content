@@ -8,8 +8,8 @@ published: false
 
 # はじめに
 久々にJuliaのパッケージメンテナンスを再開した時にアレどうなってたっけ？となることが多かったので、雑多ですが列挙していきます。
-[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の17日目ではそのような記事でお送りしていきます。
 
+- 共有パッケージ環境を使用する方法
 - リリース時にドキュメントが生成されるようにする方法
 - ローカル環境でのテストのcoverage取得
 - Documenter.jlで生成したドキュメントをローカルで確認
@@ -17,9 +17,41 @@ published: false
 - テストの実行環境を用意
 - コード検索
 
-Linux環境前提[^1]で書いています。Macでもそのまま動くことが多いと思います。Windowsはどうなんですかね、すみませんよく知りません。
+[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の17日目の記事のはじまりでした。
+よろしくおねがいします。
 
-[^1]: 私はManjaro Linuxをこの10年くらい使っている気がします。使いやすくてUIデザインもかっこいいのでLinux初心者にもオススメです。
+# 共有パッケージ環境を使用する方法
+
+## 先に結論を提示
+
+juliaのCLI引数で`--project=@pkgdev`のように指定すれば
+
+```
+julia --project=@pkgdev
+```
+
+## 詳細をもう少し解説
+
+Juliaのパッケージには「」「」「」の3種類があって…みたいな話
+(すいません書きかけです)
+
+```
+               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.12.1 (2025-10-17)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org release
+|__/                   |
+
+(@pkgdev) pkg> st
+Status `~/.julia/environments/pkgdev/Project.toml`
+  [e30172f5] Documenter v1.16.1
+  [35a29f4d] DocumenterTools v0.1.21
+  [62bfec6d] Runic v1.5.1
+  [1e6cf692] TestEnv v1.103.0
+```
 
 # リリース時にドキュメントが生成されるようにする方法
 ## 先に結論を提示
@@ -55,7 +87,7 @@ using DocumenterTools
 DocumenterTools.genkeys(; user="hyrodium", repo="Desmos.jl")
 ```
 
-出力は以下のようになります。Infoの内側にURLが2つ記載されていて、ここにアクセスして登録するだけでOKです。
+出力は以下のようになります。Infoの内側にURLが2つ記載されているので、ここにアクセスして登録するだけでOKです。
 
 ```
 julia> DocumenterTools.genkeys(; user="hyrodium", repo="Desmos.jl")
@@ -72,7 +104,7 @@ LS0tLS1C(中略)LS0tLQo=
 すいません、書いてから気づきましたが、[ごまふあざらし](https://bsky.app/profile/gomahuazarashi.bsky.social)さんが同じ内容の記事を書いてくれてましたね。
 https://zenn.dev/terasakisatoshi/articles/87e730a50915f9
 
-あとのセクションでは、(たぶん)他の日本語記事と内容が被ってない気がするので許してください！！！
+以降のセクションでは、(たぶん)他の日本語記事と内容が被ってない気がするので許してください！！！
 
 # ローカル環境でのテストのカバレッジ取得
 ## 先に結論を提示
@@ -97,7 +129,7 @@ GitHub上でパブリックリポジトリとしてパッケージ開発を進�
 - Claude Code等のツールからカバレッジ取得するにはローカルファイルにカバレッジが出力される方が好ましい
 
 そこで実行するのが前述のコマンドですね。
-あれを実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
+あれを実行すればカバレッジの測定結果が人間に見やすい形式で`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
 
 ![](/images/coverage-lcov-desmos-jl.png)
 
@@ -194,16 +226,20 @@ Documenter.DocMeta.setdocmeta!(MyPkg, :DocTestSetup, :(using MyPkg); recursive=t
 doctest(MyPkg, fix=true)
 ```
 
-たったこれだけなのですが、スクリプトの
-冒頭の長かったコマンドの中身を見てみましょう。
+JuliaのREPLは優秀で便利ではあるのですが、上記のコードをパッケージごとに毎回入力するのは面倒ではあります。
+しかも`setdocmeta!`の引数はパッケージごとに単純に切り替えられるとは限らず、状況によっては`using MyOtherPkg`を読み込む必要があったり、`Random.seed!(42)`を呼び出したりすることがあるのですよね。
+
+この問題を解決するコマンドが前述の結論で提示したJuliaコマンドです。
+あれの中身を展開してインデントを揃えると以下のようになります。
 
 ```julia
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
-Documenter.deploydocs(kwargs...) = not
+Documenter.deploydocs(kwargs...) = nothing
 if isfile("docs/make.jl")
-    try include("docs/make.jl")
+    try
+        include("docs/make.jl")
     catch
     end
 else
@@ -214,21 +250,33 @@ thispkg = getfield(Main, Symbol(basename(pwd())))
 doctest(thispkg; fix=true)
 ```
 
+まだ少し分かりにくいですね。
+`Desmos.jl`が対象パッケージだとして変数を展開して、コメントも追加してみましょう。
 
-## 詳細をもう少し解説
-はい、これまたややこしいですね
-type-piracyでやっていきましょう
-
-どのようなタイミングで非デフォルトのsetdocmetaが必要になるのか？
-→関連パッケージの読み込み、Random.seed!の呼び出し
-
-https://claude.ai/chat/7b6b7723-7234-412b-bff2-21acd766d3cb
+```julia
+# Desmos.jlをdevとして依存関係に追加
+using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+Pkg.instantiate()
+using Documenter
+Documenter.deploydocs(kwargs...) = nothing
+if isfile("docs/make.jl")
+    try
+        include("docs/make.jl")
+    catch
+    end
+else
+    using Desmos
+    Documenter.DocMeta.setdocmeta!(Desmos, :DocTestSetup, :(using Desmos); recursive=true)
+end
+doctest(Desmos; fix=true)
+```
 
 CIではどうやってたっけ?
 doctest更新CIも存在していたが、更新されていない
 
 # テストの実行環境を用意
 TestEnv.jlを使えば良い
+
 
 
 # コード検索
