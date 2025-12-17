@@ -117,7 +117,7 @@ https://zenn.dev/terasakisatoshi/articles/87e730a50915f9
 
 # ローカル環境でのテストのカバレッジ取得
 ## 先に結論を提示
-以下のコマンドを`~/.julia/dev/MyPkg`以下で実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
+以下のコマンドを`~/.julia/dev/MyPkg`以下で実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。(注意: `genhtml`コマンドの事前インストールが必要)
 
 ```bash
 julia --project=. --startup-file=no -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia --project=@pkgdev --startup-file=no -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
@@ -163,9 +163,9 @@ genhtml coverage-lcov.info --output-directory coverage
 
 最初のテストでは`src/*.jl.*.cov`のようなJulia言語特有のカバレッジ記録ファイルが出力されています。
 これを、lcovという他の言語でも共通のカバレッジ記録用フォーマットに変換するのが[Coverage.jl](https://github.com/JuliaCI/Coverage.jl)の役割ですね。
-lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[^3]
+lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[^genhtml]
 
-[^3]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
+[^genhtml]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
 
 # Documenter.jlで生成したドキュメントをローカルで確認
 ## 先に結論を提示
