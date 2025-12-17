@@ -10,7 +10,7 @@ published: false
 久々にJuliaのパッケージメンテナンスを再開した時にアレどうなってたっけ？となることが多かったので、雑多ですが列挙していきます。
 
 - 共有パッケージ環境を使用する方法
-- リリース時にドキュメントが生成されるようにする方法
+- リリース時にのみドキュメントが生成できない問題を解決する方法
 - ローカル環境でのテストのcoverage取得
 - Documenter.jlで生成したドキュメントをローカルで確認
 - jldoctestの更新
@@ -29,6 +29,9 @@ juliaのCLI引数で`--project=@pkgdev`のように指定すれば
 ```
 julia --project=@pkgdev
 ```
+
+TODO この記事で必要なパッケージインストール
+
 
 ## 詳細をもう少し解説
 
@@ -53,7 +56,7 @@ Status `~/.julia/environments/pkgdev/Project.toml`
   [1e6cf692] TestEnv v1.103.0
 ```
 
-# リリース時にドキュメントが生成されるようにする方法
+# リリース時にのみドキュメントが生成できない問題を解決する方法
 ## 先に結論を提示
 以下のコードをREPLとかで実行して出力に従ってキーをGitHubリポジトリに登録すれば良い。
 ```julia
@@ -237,18 +240,24 @@ JuliaのREPLは優秀で便利ではあるのですが、上記のコードを�
 あれの中身を展開してインデントを揃えると以下のようになります。
 
 ```julia
+# docs/make.jlが存在する場合
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
 Documenter.deploydocs(kwargs...) = nothing
-if isfile("docs/make.jl")
-    try
-        include("docs/make.jl")
-    catch
-    end
-else
-    pkg_sym = Symbol(basename(pwd()))
-    Core.eval(Main, :(using $pkg_sym; Documenter.DocMeta.setdocmeta!($pkg_sym, :DocTestSetup, :(using $pkg_sym); recursive=true)))
+try
+    include("docs/make.jl")
+catch
+end
+thispkg = getfield(Main, Symbol(basename(pwd())))
+doctest(thispkg; fix=true)
+
+# docs/make.jlが存在しない場合
+using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+Pkg.instantiate()
+using Documenter
+pkg_sym = Symbol(basename(pwd()))
+Core.eval(Main, :(using $pkg_sym; Documenter.DocMeta.setdocmeta!($pkg_sym, :DocTestSetup, :(using $pkg_sym); recursive=true)))
 end
 thispkg = getfield(Main, Symbol(basename(pwd())))
 doctest(thispkg; fix=true)
@@ -258,35 +267,51 @@ doctest(thispkg; fix=true)
 `Desmos.jl`が対象パッケージだとして変数を展開して、コメントも追加してみましょう。
 
 ```julia
+# docs/make.jlが存在する場合
 # Desmos.jlをdevとして依存関係に追加
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
+# 以降のmake.jlの実行時に不要なデプロイ処理を避けるためにメソッドを上書きして無効化しておく。
 Documenter.deploydocs(kwargs...) = nothing
-if isfile("docs/make.jl")
-    try
-        include("docs/make.jl")
-    catch
-    end
-else
-    using Desmos
-    Documenter.DocMeta.setdocmeta!(Desmos, :DocTestSetup, :(using Desmos); recursive=true)
+try
+    # setdocmeta!の設定を読み込むためにincludeする
+    # このファイルの中で実行されるDocumenter.makedocsは不要に思えるが、後段のdoctestでmakedocsが呼ばれるので無効化してはいけない。
+    include("docs/make.jl")
+catch
 end
+# ここでdoctestを更新する
+doctest(Desmos; fix=true)
+
+# docs/make.jlが存在しない場合
+# Desmos.jlをdevとして依存関係に追加
+using Pkg;Pkg.develop(PackageSpec(path=pwd()))
+Pkg.instantiate()
+using Documenter
+using Desmos
+# using MyPkgするのは標準的な作法だとしてsetdocmetaしておく
+Documenter.DocMeta.setdocmeta!(Desmos, :DocTestSetup, :(using Desmos); recursive=true)
+# ここでdoctestを更新する
 doctest(Desmos; fix=true)
 ```
 
-CIではどうやってたっけ?
+このようなちょっと面倒なコードを実行してくれるのが前述のワンライナーでした。
 
-https://github.com/julia-actions/julia-fix-doctests
-
-doctest更新CIも存在していたが、更新されていない
+このような処理を自動でGitHub Actionsが定期的に実行してくれるのが理想的だと思いますよね？
+実は[actions/julia-fix-doctests](https://github.com/julia-actions/julia-fix-doctests)というものがあるんですが、数年間メンテナンスされておらず、本記事で示したように`docs/make.jl`を読み込んだりはしてくれません。
+気が向いた時にPR送ってみようと思います。
 
 # テストの実行環境を用意
+
+
+
 TestEnv.jlを使えば良い
 https://github.com/JuliaTesting/TestEnv.jl
 
 
 # コード検索
+
+
 Juliaには`@less`マクロがあって…
 しかし、「この関数が他のパッケージでどのように使われているか知りたい」みたいに
 ここでJuliaHubの
