@@ -24,37 +24,44 @@ published: false
 
 ## 先に結論を提示
 
-juliaのCLI引数で`--project=@pkgdev`のように指定すれば
+juliaのCLI引数で`--project=@pkgdev`のように`@<shared env name>`を指定すれば共有パッケージ環境でJuliaが起動します。
 
-```
+```bash
 julia --project=@pkgdev
 ```
 
-TODO この記事で必要なパッケージインストール
+今回の記事で使用するパッケージは以下のコマンドでインストールできます。
 
+```bash
+julia --project=@pkgdev --startup-file=no -e 'using Pkg; Pkg.add(["Documenter", "DocumenterTools", "Coverage", "TestEnv", "LiveServer"])'
+```
 
 ## 詳細をもう少し解説
 
-Juliaのパッケージ環境には「デフォルトのv1.x」「ディレクトリごとのプロジェクト環境」「共有プロジェクト環境「スクリプト環境」の4種類があって…みたいな話
-(すいません書きかけです)
+Juliaのパッケージ環境には大雑把に言って「デフォルトの`v1.x`」「ディレクトリごとのプロジェクト環境」「共有プロジェクト環境」「スクリプト環境」の4種類があります。
 
-```
-               _
-   _       _ _(_)_     |  Documentation: https://docs.julialang.org
-  (_)     | (_) (_)    |
-   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
-  | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 1.12.1 (2025-10-17)
- _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org release
-|__/                   |
+- デフォルトの`v1.x`
+  - `--project`を指定しなかった場合に起動するもの
+  - プロジェクトファイルの
+  - `~/.julia/environments/v1.x/Project.toml`
+- ディレクトリごとのプロジェクト環境
+  - `Project.toml`の配置されたディレクトリを直接指定して起動する環境
+  - `path/to/Project.toml`
+- **共有プロジェクト環境**
+  - ディレクトリを指定せずに実行できるようなプロジェクト環境
+  - `~/.julia/environments/<shared env name>/Project.toml`
+- スクリプト環境
+  - [JuliaLang/julia #50864](https://github.com/JuliaLang/julia/issues/50864), [JuliaLang/julia #53352](https://github.com/JuliaLang/julia/issues/53352)で追加されたパッケージ環境
+  - 今回の記事を書くに当たって知った機能ですが、筆者は詳しく知りません
 
-(@pkgdev) pkg> st
-Status `~/.julia/environments/pkgdev/Project.toml`
-  [e30172f5] Documenter v1.16.1
-  [35a29f4d] DocumenterTools v0.1.21
-  [62bfec6d] Runic v1.5.1
-  [1e6cf692] TestEnv v1.103.0
-```
+この共有プロジェクト環境というのが便利で、以下のような要望を満たしてくれるのですよね。
+
+- デフォルトのグローバル環境のようにどのディレクトリに居たとしても使いたい
+- しかしパッケージ間の依存関係を解決するために複数のグローバル環境を切り替えたい
+
+[この機能はv1.7辺りから存在してた](https://docs.julialang.org/en/v1.7-dev/NEWS/#Command-line-option-changes)ようなのですが、私は最近になって[Runic.jl](https://github.com/fredrikekre/Runic.jl)のインストール方法を見て知りました。もしかして知らなかったの私だけか？？？？？？？？[^5]
+
+[^5]: 現在(Julia v1.12.3)の`julia --help`のメッセージには少なくともこの機能の説明は無いんですよね。あとで余裕のあるときにPRつくります。
 
 # リリース時にのみドキュメントが生成できない問題を解決する方法
 ## 先に結論を提示
@@ -112,6 +119,7 @@ https://zenn.dev/terasakisatoshi/articles/87e730a50915f9
 # ローカル環境でのテストのカバレッジ取得
 ## 先に結論を提示
 以下のコマンドを`~/.julia/dev/MyPkg`以下で実行すればカバレッジが`~/.julia/dev/MyPkg/coverage/index.html`に出力されます。
+
 ```bash
 julia --project=. -e 'using Pkg; Pkg.test(basename(pwd()); coverage=true)' && julia -e 'using Coverage; coverage=process_folder(); LCOV.writefile("coverage-lcov.info", coverage)' && genhtml coverage-lcov.info --output-directory coverage
 ```
@@ -129,7 +137,7 @@ https://app.codecov.io/gh/hyrodium/Desmos.jl/tree/main/src
 [![](/images/coverage-codecov-desmos-jl.png)](https://app.codecov.io/gh/hyrodium/Desmos.jl/tree/main/src)
 
 しかし以下のようなケースではローカル環境でのカバレッジ取得が欲しくなります。
-- プライベートリポジトリで作業しているので、codecov.ioを使いたくない
+- プライベートリポジトリで作業しているので、codecov.ioを使えない
 - CIを待つ時間がもったいないので、ローカル環境でカバレッジ確認したい
 - Claude Code等のツールからカバレッジ取得するにはローカルファイルにカバレッジが出力される方が好ましい
 
@@ -156,16 +164,16 @@ genhtml coverage-lcov.info --output-directory coverage
 
 最初のテストでは`src/*.jl.*.cov`のようなJulia言語特有のカバレッジ記録ファイルが出力されています。
 これを、lcovという他の言語でも共通のカバレッジ記録用フォーマットに変換するのが[Coverage.jl](https://github.com/JuliaCI/Coverage.jl)の役割ですね。
-lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[3^]
+lcovから人間の読みやすいフォーマットに変換するコマンドが最後の`genhtml`コマンドです。[^3]
 
-[3^]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
+[^3]: `genhtml`コマンドはManjaroなどでは`pacman -S lcov`でインストール可能です。ところで、このコマンド名はImageMagickの`convert`くらい酷い命名じゃないですか？
 
 # Documenter.jlで生成したドキュメントをローカルで確認
 ## 先に結論を提示
 
 以下のコマンドを実行すれば localhost:8000 などのアドレスからドキュメントがプレビューできます。
 ```bash
-julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");' && julia -e 'using LiveServer; serve(dir="docs/build")'
+julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");' && julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
 ```
 
 ## 詳細をもう少し解説
@@ -178,7 +186,7 @@ GitHubでパッケージを管理している場合は、GitHub Pagesにデプ�
 julia --project=docs -e 'using Pkg;Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate();include("docs/make.jl");'
 
 # ビルドされたドキュメントを表示するサーバーを立ち上げる
-julia -e 'using LiveServer; serve(dir="docs/build")'
+julia --project=@pkgdev -e 'using LiveServer; serve(dir="docs/build")'
 ```
 
 # jldoctestの更新
@@ -239,8 +247,7 @@ JuliaのREPLは優秀で便利ではあるのですが、上記のコードを�
 この問題を解決するコマンドが前述の結論で提示したJuliaコマンドです。
 あれの中身を展開してインデントを揃えると以下のようになります。
 
-```julia
-# docs/make.jlが存在する場合
+```julia: docs/make.jlが存在する場合
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
@@ -251,8 +258,9 @@ catch
 end
 thispkg = getfield(Main, Symbol(basename(pwd())))
 doctest(thispkg; fix=true)
+```
 
-# docs/make.jlが存在しない場合
+```julia: docs/make.jlが存在しない場合
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
@@ -266,40 +274,38 @@ doctest(thispkg; fix=true)
 まだ少し分かりにくいですね。
 `Desmos.jl`が対象パッケージだとして変数を展開して、コメントも追加してみましょう。
 
-```julia
-# docs/make.jlが存在する場合
+```julia: docs/make.jlが存在する場合
 # Desmos.jlをdevとして依存関係に追加
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
-# 以降のmake.jlの実行時に不要なデプロイ処理を避けるためにメソッドを上書きして無効化しておく。
+# 以降の`make.jl`の実行時に不要なデプロイ処理を避けるためにメソッドを上書きして無効化しておく
 Documenter.deploydocs(kwargs...) = nothing
 try
-    # setdocmeta!の設定を読み込むためにincludeする
-    # このファイルの中で実行されるDocumenter.makedocsは不要に思えるが、後段のdoctestでmakedocsが呼ばれるので無効化してはいけない。
+    # `setdocmeta!`の設定を読み込むためにincludeする
+    # このファイルの中で実行される`Documenter.makedocs`は不要に思えるが、後段の`doctest`で`makedocs`が呼ばれるので無効化してはいけない
     include("docs/make.jl")
 catch
 end
 # ここでdoctestを更新する
 doctest(Desmos; fix=true)
+```
 
-# docs/make.jlが存在しない場合
+```julia: docs/make.jlが存在しない場合
 # Desmos.jlをdevとして依存関係に追加
 using Pkg;Pkg.develop(PackageSpec(path=pwd()))
 Pkg.instantiate()
 using Documenter
 using Desmos
-# using MyPkgするのは標準的な作法だとしてsetdocmetaしておく
+# doctest実行時に`using MyPkg`を省略するのは標準的な作法だとして`setdocmeta!`しておく
 Documenter.DocMeta.setdocmeta!(Desmos, :DocTestSetup, :(using Desmos); recursive=true)
 # ここでdoctestを更新する
 doctest(Desmos; fix=true)
 ```
 
-このようなちょっと面倒なコードを実行してくれるのが前述のワンライナーでした。
+このようなちょっと面倒なコードを実行してくれるのが前述のワンライナーでした。[^julia-fix-doctests]
 
-このような処理を自動でGitHub Actionsが定期的に実行してくれるのが理想的だと思いますよね？
-実は[actions/julia-fix-doctests](https://github.com/julia-actions/julia-fix-doctests)というものがあるんですが、数年間メンテナンスされておらず、本記事で示したように`docs/make.jl`を読み込んだりはしてくれません。
-気が向いた時にPR送ってみようと思います。
+[^julia-fix-doctests]: このような処理を自動でGitHub Actionsが定期的に実行してくれるのが理想的だと思いますよね？実は[actions/julia-fix-doctests](https://github.com/julia-actions/julia-fix-doctests)というものがあるんですが、数年間メンテナンスされておらず、本記事で示したように`docs/make.jl`を読み込んだりはしてくれません。気が向いた時にPR送ってみようと思います。
 
 # テストの実行環境を用意
 
