@@ -6,6 +6,8 @@ topics: ["desmos", "julia"]
 published: true
 ---
 
+これは[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の20日目の記事です。遅くなってすみません。記事のネタのためのDemsos.jlの開発を優先しちゃって遅くなっちゃいました。
+
 # はじめに
 - Desmosはウェブブラウザ上でグラフを書ける数学ツールだよ
 - Julia言語は科学技術計算に特化しているから、Desmosと相互にデータを受け渡して使えると嬉しいよね
