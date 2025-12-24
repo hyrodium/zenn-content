@@ -280,7 +280,7 @@ DesmosState
 ```
 
 ## Desmos API
-`DesmosState`型がJSONを表すとして、それをどのようにブラウザの外で描画すれば良いでしょうか？
+`DesmosState`型がJSONに対応するとして、それをどのようにブラウザ外で描画すれば良いでしょうか？
 
 これを叶えてくれるのが[Desmos API](https://www.desmos.com/api/v1.11/docs/index.html)です！ ライブラリがjsファイルとして公開されていて、気軽に誰でもDesmosのグラフを自分のウェブページに埋め込んで利用できるようになっています。
 
@@ -288,7 +288,7 @@ DesmosState
 
 [^4]: [v1.10のドキュメント](https://www.desmos.com/api/v1.10/docs/index.html)ではAPIキーが最初のコード例に記載されています。v1.11以降のドキュメントでは自分でAPIキーを
 
-個人利用では無料、商用利用では有料のようです。Desmos.jlでのOSSでの利用なので、問題ないでしょう。[^5]
+Desmos APIは個人利用では無料、商用利用では有料のようです。Desmos.jlの開発は趣味でやっているのでタダ、ありがたいですね。[^5]
 
 [^5]: Desmos.jlはMITライセンスとして公開されていますが、APIの利用に当たっては商用利用が制限される建付けになっています。ご注意ください。
 
@@ -420,9 +420,10 @@ https://github.com/hyrodium/Desmos.jl/blob/c9dfc7d7f216f3c195152a348f81f878c83da
 [^8]: [Desmosユーザーガイド](https://desmos.s3.amazonaws.com/Desmos_User_Guide_JA.pdf)に私の名前があります。
 
 # 今後の予定
-- Plots.jlのバックエンドとして使いたいね
+- Desmos.jlをPlots.jlのバックエンドとして使いたいね
 	- Plots.jlのメンテナ不足が大変そうなので、そこのお手伝いもやってみたい
 	- みんなMakie.jlに浮気しているか、Plots.jlを使っているけどcontributionに興味ないかだね
-- もっとDemosの機能を取り込みたいね
+- もっとDesmosの機能を取り込みたいね
 	- 3Dプロットできるようにする
 	- 複素数を扱えるようにする
+	- etc.
