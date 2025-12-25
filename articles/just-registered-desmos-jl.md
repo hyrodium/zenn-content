@@ -6,7 +6,7 @@ topics: ["desmos", "julia"]
 published: true
 ---
 
-これは[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の20日目の記事です。遅くなってすみません。記事のネタのためのDemsos.jlの開発を優先しちゃって遅くなっちゃいました。
+これは[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の20日目の記事です。遅くなってすみません。記事のネタのためのDesmos.jlの開発を優先しちゃって遅くなっちゃいました。
 
 # はじめに
 - Desmosはウェブブラウザ上でグラフを書ける数学ツールだよ
@@ -93,7 +93,7 @@ end
 インタラクティブにプロット結果を触れるのが、Desmos.jlを使う一つのメリットですね。
 
 ## GLM.jl vs Desmos.jl
-適当な2次元上の点列を放物線でフィッテングすることを考えましょう。
+適当な2次元上の点列を放物線でフィッティングすることを考えましょう。
 
 ```julia
 using Random
@@ -286,7 +286,7 @@ DesmosState
 
 記事執筆時点において、最新のドキュメントのAPIバージョンはv1.12、https://desmos.com/calculator で使用されているAPIバージョンはv1.11、ドキュメントでAPIキーが公開されているバージョンはv1.10です。[^4]
 
-[^4]: [v1.10のドキュメント](https://www.desmos.com/api/v1.10/docs/index.html)ではAPIキーが最初のコード例に記載されています。v1.11以降のドキュメントでは自分でAPIキーを
+[^4]: [v1.10のドキュメント](https://www.desmos.com/api/v1.10/docs/index.html)ではAPIキーが最初のコード例に記載されています。v1.11以降のドキュメントではAPIキーの記載がなく、利用には申請が必要になります。
 
 Desmos APIは個人利用では無料、商用利用では有料のようです。Desmos.jlの開発は趣味でやっているのでタダ、ありがたいですね。[^5]
 
@@ -416,7 +416,7 @@ https://github.com/hyrodium/Desmos.jl/blob/c9dfc7d7f216f3c195152a348f81f878c83da
 これくらいの状況であれば…Desmos.jlをGeneralに登録しても倫理的に問題はないはず…。
 引き続き、気を引き締めて開発に取り組んでいきます。
 
-[^7]: ちなみに[Slack.jl](github.com/JuliaLangSlack/Slack.jl)という非公式パッケージがGeneralに登録されていますが、全然メンテナンスされていなかったりします。
+[^7]: ちなみに[Slack.jl](https://github.com/JuliaLangSlack/Slack.jl)という非公式パッケージがGeneralに登録されていますが、全然メンテナンスされていなかったりします。
 [^8]: [Desmosユーザーガイド](https://desmos.s3.amazonaws.com/Desmos_User_Guide_JA.pdf)に私の名前があります。
 
 # 今後の予定
