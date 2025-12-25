@@ -1,5 +1,5 @@
 ---
-title: "Desmos.jlをつくってGeneralに登録したよ"
+title: "Desmos.jlを作ってGeneralに登録したよ"
 emoji: "〽"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["desmos", "julia"]
@@ -8,10 +8,10 @@ published: true
 
 これは[Julia Advent Calendar 2025](https://qiita.com/advent-calendar/2025/julia)の20日目の記事です。遅くなってすみません。記事のネタのためのDesmos.jlの開発を優先しちゃって遅くなっちゃいました。
 
-# はじめに
-- Desmosはウェブブラウザ上でグラフを書ける数学ツールだよ
+# TL;DR
+- [Desmos](https://desmos.com)はウェブブラウザ上でグラフを書ける数学ツールだよ
 - Julia言語は科学技術計算に特化しているから、Desmosと相互にデータを受け渡して使えると嬉しいよね
-- [Desmos.jl](https://github.com/hyrodium/Desmos.jl)というパッケージを作ってGeneralに登録したよ
+- [Desmos.jl](https://github.com/hyrodium/Desmos.jl)というパッケージを作ってJuliaパッケージレジストリ[General](https://github.com/JuliaRegistries/General)に登録したよ
 
 https://github.com/hyrodium/Desmos.jl
 
@@ -221,7 +221,7 @@ end
 
 ## Desmos Text I/Oとの連携
 
-Desmos Text I/Oというのは私が作ったブラウザ拡張です。
+[Desmos Text I/O](https://github.com/hyrodium/desmos-text-io)というのは私が作ったブラウザ拡張です。
 
 https://www.youtube.com/watch?v=cwNIwvL-a2U
 
@@ -322,7 +322,7 @@ julia> desmos_latexify(ex)  # Desmosの標準的なフォーマットに合わ�
 julia> ex = :([1,2,5])
 :([1, 2, 5])
 
-julia> Latexify.latexify(ex)  # Latexify.jl
+julia> Latexify.latexify(ex)  # Latexify.jlでは縦ベクトル表記に変換される
 L"$\left[
 \begin{array}{c}
 1 \\
@@ -348,8 +348,8 @@ julia> desmos_latexify(ex)  # Desmosだと[]は配列のように扱われる
 
 ```julia
 using Desmos
-xs = -10:0.1:10
-ys = xs.^2/10 .* randn(length(xs))
+xs = -10:0.5:10
+ys = -xs.^3/100
 nt = (; xs, ys)
 @desmos begin
     sin(x)
@@ -357,6 +357,8 @@ nt = (; xs, ys)
     @table $nt color="#ffaa00"
 end
 ```
+
+![](/images/desmos-macro.png)
 
 ## ユーザー定義型をDesmosで描画するには
 
